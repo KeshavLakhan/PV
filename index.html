@@ -1,508 +1,182 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Paige 💕</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hi Paige 💗</title>
 
-  <style>
-    :root{
-      --bg1:#fdecef;
-      --bg2:#e8dcf6;
-      --pink:#f7a8c4;
-      --mint:#b8eadf;
-      --gold:#f6d7a7;
-      --text:#5a4a5a;
-      --muted:#7a6a7a;
-      --shadow: 0 30px 80px rgba(0,0,0,0.12);
-    }
+<style>
+* { box-sizing: border-box; }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #ffeef4, #f8c8d8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(800px 500px at 20% 10%, #fff6fa, transparent 60%),
-        radial-gradient(700px 500px at 80% 20%, #f3ecff, transparent 55%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      overflow:hidden;
-    }
+/* CARD */
+.card {
+  width: 90%;
+  max-width: 640px;
+  background: white;
+  border-radius: 28px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0,0,0,.15);
+}
 
-    .wrap{
-      height:100%;
-      display:grid;
-      place-items:center;
-      padding:24px;
-    }
+/* HEADINGS */
+h1 {
+  margin: 0;
+  font-size: 36px;
+}
+p {
+  margin-top: 6px;
+  color: #666;
+}
 
-    .card{
-      width:min(720px, 92vw);
-      border-radius:28px;
-      background:rgba(255,255,255,0.65);
-      backdrop-filter:blur(16px);
-      border:1px solid rgba(255,255,255,0.7);
-      box-shadow:var(--shadow);
-      padding:28px;
-      text-align:center;
-    }
+/* BUTTONS */
+button {
+  border: none;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+button:hover {
+  transform: scale(1.05);
+}
 
-    h1{
-      font-size:clamp(30px,4vw,44px);
-      margin:10px 0;
-    }
+.play {
+  background: linear-gradient(135deg, #ff8fc7, #ff5fa2);
+  color: white;
+}
 
-    p{
-      color:var(--muted);
-      max-width:52ch;
-      margin:0 auto 18px;
-      line-height:1.6;
-    }
+.yes {
+  background: linear-gradient(135deg, #ff9ad5, #ff6bb3);
+  color: white;
+}
 
-    /* OVERLAYS */
-    .overlay{
-      position:fixed;
-      inset:0;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      z-index:50;
-      background:rgba(255, 230, 240, 0.18);
-      backdrop-filter: blur(10px);
-    }
-    .hidden{ display:none !important; }
+.no {
+  background: linear-gradient(135deg, #c7e7c2, #9dd9a0);
+  color: #234;
+  position: absolute;
+}
 
-    /* Mario-ish welcome screen */
-    .marioBg{
-      position:absolute;
-      inset:-40px;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.85), transparent 45%),
-        radial-gradient(circle at 80% 25%, rgba(255,255,255,0.8), transparent 42%),
-        radial-gradient(circle at 40% 70%, rgba(255,255,255,0.6), transparent 45%),
-        linear-gradient(180deg, #ffd4e4, #f7b5d3 55%, #f1a2c9);
-      filter:saturate(1.05);
-    }
+/* VIDEO */
+.video-wrap {
+  margin-top: 20px;
+  display: none;
+}
+video {
+  width: 100%;
+  border-radius: 20px;
+  background: black;
+}
 
-    .marioCard{
-      width:min(720px, 92vw);
-      border-radius:28px;
-      background:rgba(255,255,255,0.78);
-      backdrop-filter:blur(16px);
-      border:1px solid rgba(255,255,255,0.85);
-      box-shadow:var(--shadow);
-      padding:28px;
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-    }
+/* QUESTION */
+.actions {
+  margin-top: 22px;
+  position: relative;
+  height: 80px;
+}
 
-    .marioTop{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
-    .badge{
-      font-weight:900;
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.85);
-      border:1px solid rgba(255,255,255,0.9);
-    }
-
-    .pixelLine{
-      width:100%;
-      height:10px;
-      background:
-        repeating-linear-gradient(
-          90deg,
-          rgba(247,168,196,0.95) 0 16px,
-          rgba(246,215,167,0.95) 16px 32px,
-          rgba(184,234,223,0.95) 32px 48px,
-          rgba(255,255,255,0.95) 48px 64px
-        );
-      border-radius:10px;
-      margin:14px 0 18px;
-      opacity:0.9;
-    }
-
-    .startTitle{
-      font-size:clamp(34px,5vw,54px);
-      margin:6px 0 4px;
-      letter-spacing:-0.5px;
-    }
-
-    .startSub{
-      margin:0 auto 14px;
-      color:#7d6a7a;
-    }
-
-    .btnRow{
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .btn{
-      border:none;
-      cursor:pointer;
-      padding:14px 22px;
-      border-radius:999px;
-      font-weight:900;
-      font-size:16px;
-      box-shadow:0 16px 40px rgba(0,0,0,0.16);
-      border:1px solid rgba(255,255,255,0.75);
-      transition:transform .12s ease;
-      user-select:none;
-    }
-    .btn:hover{ transform:scale(1.03); }
-
-    .btnPlay{ background:linear-gradient(135deg, var(--pink), var(--gold)); }
-    .btnNo{ background:linear-gradient(135deg, var(--mint), var(--gold)); }
-
-    .tiny{
-      font-size:12px;
-      color:#8c7a8c;
-      margin-top:12px;
-    }
-
-    /* ===== PERFORMANCE FIX FOR INTRO VIDEO =====
-       Keep video container "plain": no shadow, no blur, no transitions.
-       This reduces jank on weaker devices + GitHub Pages.
-    */
-    .videoBox{
-      width:100%;
-      aspect-ratio:16/9;
-      border-radius:18px;
-      overflow:hidden;
-      background:#000;
-      border:1px solid rgba(255,255,255,0.7);
-
-      box-shadow:none;
-      filter:none;
-      transition:none;
-      will-change:transform;
-    }
-
-    .videoBox video{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit:cover;
-
-      transform: translateZ(0);
-      backface-visibility:hidden;
-    }
-
-    /* MAIN QUESTION card is hidden until intro ends */
-    #mainCard{
-      opacity:0;
-      pointer-events:none;
-      transform:translateY(6px);
-      transition:opacity .35s ease, transform .35s ease;
-    }
-    #mainCard.ready{
-      opacity:1;
-      pointer-events:auto;
-      transform:translateY(0);
-    }
-
-    /* Question Stage */
-    .stage{
-      position:relative;
-      height:260px;
-      border-radius:22px;
-      background:rgba(255,255,255,0.45);
-      border:1px solid rgba(255,255,255,0.6);
-      overflow:hidden;
-      margin-top:8px;
-    }
-
-    .bubble{
-      position:absolute;
-      padding:14px 22px;
-      border-radius:999px;
-      font-size:16px;
-      font-weight:900;
-      cursor:pointer;
-      border:1px solid rgba(255,255,255,0.8);
-      background:linear-gradient(135deg, var(--pink), var(--gold));
-      box-shadow:0 12px 30px rgba(0,0,0,0.15);
-      transition:transform .12s ease;
-      user-select:none;
-    }
-    .bubble:hover{ transform:scale(1.06); }
-    .no{ background:linear-gradient(135deg, var(--mint), var(--gold)); }
-
-    .scene{
-      position:absolute;
-      inset:0;
-      display:grid;
-      place-items:center;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .35s ease;
-      padding:16px;
-    }
-    .scene.active{ opacity:1; pointer-events:auto; }
-
-    .scene-card{
-      width:min(560px, 92%);
-      background:rgba(255,255,255,0.92);
-      border-radius:22px;
-      padding:18px;
-      box-shadow:0 20px 50px rgba(0,0,0,0.15);
-      position:relative;
-      overflow:hidden;
-    }
-
-    .reset{
-      border:none;
-      background:rgba(255,255,255,0.84);
-      padding:10px 16px;
-      border-radius:999px;
-      cursor:pointer;
-      font-size:13px;
-      margin-top:10px;
-      font-weight:800;
-    }
-
-    .music-hint{
-      font-size:12px;
-      color:#9a8a9a;
-      margin-top:12px;
-    }
-
-    /* Disable transitions/animations while intro video is playing */
-    body.playingIntro *{
-      transition:none !important;
-      animation:none !important;
-    }
-  </style>
+.hidden { display: none; }
+</style>
 </head>
 
 <body>
-  <!-- Background song (ONLY plays after YES on the QUESTION screen) -->
-  <audio id="bgSong" loop preload="auto">
-    <source src="song.mp3" type="audio/mpeg">
-  </audio>
 
-  <!-- WELCOME SCREEN (ALWAYS FIRST) -->
-  <div class="overlay" id="welcomeOverlay">
-    <div class="marioBg" aria-hidden="true"></div>
-    <div class="marioCard">
-      <div class="marioTop">
-        <span class="badge">WELCOME 💗</span>
-        <span class="badge">LEVEL 1</span>
-      </div>
+<div class="card">
 
-      <div class="startTitle">Hi Paige 💕</div>
-      <div class="startSub">I made something for you</div>
-      <div class="pixelLine"></div>
+  <!-- WELCOME SCREEN -->
+  <div id="welcome">
+    <h1>Hi Paige 💗</h1>
+    <p>I made something for you</p>
+    <br />
+    <button class="play" id="playBtn">Play ▶</button>
+  </div>
 
-      <div class="btnRow">
-        <button class="btn btnPlay" id="playBtn">Play ▶</button>
-        <button class="btn btnNo" id="welcomeNo">No 🤍</button>
-      </div>
+  <!-- INTRO VIDEO -->
+  <div class="video-wrap" id="introWrap">
+    <video id="introVideo" playsinline preload="metadata">
+      <source src="intro.mp4" type="video/mp4">
+    </video>
+  </div>
 
-      <div class="tiny">Tap Play to start (this enables audio).</div>
+  <!-- QUESTION -->
+  <div id="question" class="hidden">
+    <h1>Will you be my Valentine? 💖</h1>
+
+    <div class="actions">
+      <button class="yes" id="yesBtn">Yes 💕</button>
+      <button class="no" id="noBtn">No 💚</button>
     </div>
   </div>
 
-  <!-- INTRO SCREEN (hidden until Play) -->
-  <div class="overlay hidden" id="introOverlay">
-    <div class="card" style="padding:22px;">
-      <h1 style="margin-top:0;">💗</h1>
-      <p style="margin-bottom:12px;">One second…</p>
+  <!-- YES SCREEN -->
+  <div id="yesScreen" class="hidden">
+    <h1>You said YES 🥹💖</h1>
 
-      <div class="videoBox">
-        <video id="introVideo" playsinline preload="auto">
-          <source src="intro.mp4" type="video/mp4">
-        </video>
-      </div>
-
-      <div class="tiny">Enjoy this little intro 💕</div>
+    <div class="video-wrap" style="display:block">
+      <video id="yesVideo" playsinline muted>
+        <source src="yes.mp4" type="video/mp4">
+      </video>
     </div>
+
+    <p style="margin-top:10px;">This made my whole day.</p>
   </div>
 
-  <!-- QUESTION SCREEN -->
-  <div class="wrap">
-    <div class="card" id="mainCard">
-      <h1>Paige, will you be my Valentine? 💕</h1>
-      <p>I was hoping you’d say yes… but no pressure 💗</p>
+</div>
 
-      <div class="stage" id="stage">
-        <button class="bubble yes" id="yesBtn">Yes 💞</button>
-        <button class="bubble no" id="noBtn">No 🤍</button>
+<audio id="song" src="song.mp3" preload="auto"></audio>
 
-        <div class="scene" id="yesScene">
-          <div class="scene-card">
-            <h2 style="margin:6px 0 10px;">You said YES 🥹💖</h2>
+<script>
+const playBtn = document.getElementById("playBtn");
+const welcome = document.getElementById("welcome");
+const introWrap = document.getElementById("introWrap");
+const introVideo = document.getElementById("introVideo");
+const question = document.getElementById("question");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const yesScreen = document.getElementById("yesScreen");
+const yesVideo = document.getElementById("yesVideo");
+const song = document.getElementById("song");
 
-            <div class="videoBox" style="margin-top:10px;">
-              <video id="yesVideo" muted playsinline preload="auto">
-                <source src="yes.mp4" type="video/mp4">
-              </video>
-            </div>
+/* START */
+playBtn.onclick = () => {
+  welcome.style.display = "none";
+  introWrap.style.display = "block";
+  introVideo.play();
+};
 
-            <p style="margin:6px auto 0;">This made my whole day.</p>
-            <button class="reset" onclick="resetAll()">Reset</button>
-          </div>
-        </div>
+/* AFTER INTRO */
+introVideo.onended = () => {
+  introWrap.style.display = "none";
+  question.classList.remove("hidden");
+};
 
-        <div class="scene" id="noScene">
-          <div class="scene-card">
-            <h2 style="margin:6px 0 10px;">That’s okay 💔</h2>
-            <p>Thanks for being honest — you’re still amazing 💫</p>
-            <button class="reset" onclick="resetAll()">Reset</button>
-          </div>
-        </div>
-      </div>
+/* NO BUTTON MOVES */
+function move(btn) {
+  btn.style.left = Math.random() * 60 + "%";
+  btn.style.top = Math.random() * 40 + "px";
+}
+noBtn.onmouseenter = () => move(noBtn);
+yesBtn.onmouseenter = () => move(yesBtn);
 
-      <div class="music-hint">🎧 The song plays only after you click “Yes”.</div>
-    </div>
-  </div>
+/* YES CLICK */
+yesBtn.onclick = () => {
+  question.classList.add("hidden");
+  yesScreen.classList.remove("hidden");
+  song.play();
+  yesVideo.play();
+};
+</script>
 
-  <script>
-    // Elements
-    const welcomeOverlay = document.getElementById("welcomeOverlay");
-    const playBtn = document.getElementById("playBtn");
-    const welcomeNo = document.getElementById("welcomeNo");
-
-    const introOverlay = document.getElementById("introOverlay");
-    const introVideo = document.getElementById("introVideo");
-
-    const mainCard = document.getElementById("mainCard");
-    const stage = document.getElementById("stage");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn = document.getElementById("noBtn");
-    const yesScene = document.getElementById("yesScene");
-    const noScene = document.getElementById("noScene");
-
-    const bgSong = document.getElementById("bgSong");
-    const yesVideo = document.getElementById("yesVideo");
-
-    // Force welcome to always show first
-    function forceWelcomeFirst(){
-      welcomeOverlay.classList.remove("hidden");
-      introOverlay.classList.add("hidden");
-      mainCard.classList.remove("ready");
-    }
-    forceWelcomeFirst();
-
-    let songStarted = false;
-    function startSongOnce(){
-      if(songStarted) return;
-      songStarted = true;
-      bgSong.volume = 0.35;
-      bgSong.play().catch(()=>{});
-    }
-
-    function showQuestion(){
-      introOverlay.classList.add("hidden");
-      document.body.classList.remove("playingIntro");
-      mainCard.classList.add("ready");
-      placeButtons();
-    }
-
-    // WELCOME: Play -> Intro video (with audio)
-    playBtn.addEventListener("click", async () => {
-      welcomeOverlay.classList.add("hidden");
-      introOverlay.classList.remove("hidden");
-
-      // Reduce jank while intro plays
-      document.body.classList.add("playingIntro");
-
-      try{
-        introVideo.currentTime = 0;
-        introVideo.muted = false;
-        await introVideo.play();
-      }catch(e){
-        // If blocked, user can tap the video
-      }
-    });
-
-    welcomeNo.addEventListener("click", () => {
-      welcomeNo.textContent = "Okay 🤍";
-      welcomeNo.disabled = true;
-      welcomeNo.style.opacity = "0.7";
-    });
-
-    // Intro ends -> question
-    introVideo.addEventListener("ended", showQuestion);
-
-    function placeButtons(){
-      const r = stage.getBoundingClientRect();
-      yesBtn.style.left = (r.width * 0.28) + "px";
-      yesBtn.style.top  = (r.height * 0.62) + "px";
-      noBtn.style.left  = (r.width * 0.58) + "px";
-      noBtn.style.top   = (r.height * 0.62) + "px";
-    }
-
-    function move(btn){
-      const r = stage.getBoundingClientRect();
-      const padX = 20, padY = 20;
-      const w = btn.offsetWidth || 120;
-      const h = btn.offsetHeight || 60;
-
-      const maxX = Math.max(padX, r.width - w - padX);
-      const maxY = Math.max(padY, r.height - h - padY);
-
-      const x = padX + Math.random() * (maxX - padX);
-      const y = padY + Math.random() * (maxY - padY);
-
-      btn.style.left = x + "px";
-      btn.style.top  = y + "px";
-    }
-
-    // Move BOTH
-    yesBtn.addEventListener("mouseenter", () => move(yesBtn));
-    noBtn.addEventListener("mouseenter", () => move(noBtn));
-
-    yesBtn.onclick = async () => {
-      yesScene.classList.add("active");
-      yesBtn.style.display = "none";
-      noBtn.style.display = "none";
-
-      // Song starts ONLY after clicking YES here
-      startSongOnce();
-
-      // Play YES video muted
-      try{
-        yesVideo.currentTime = 0;
-        yesVideo.muted = true;
-        await yesVideo.play();
-      }catch(e){}
-    };
-
-    noBtn.onclick = () => {
-      noScene.classList.add("active");
-      yesBtn.style.display = "none";
-      noBtn.style.display = "none";
-    };
-
-    function resetAll(){
-      yesScene.classList.remove("active");
-      noScene.classList.remove("active");
-
-      yesBtn.style.display = "block";
-      noBtn.style.display = "block";
-
-      try{
-        yesVideo.pause();
-        yesVideo.currentTime = 0;
-      }catch(e){}
-
-      placeButtons();
-    }
-  </script>
 </body>
 </html>
