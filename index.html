@@ -8,35 +8,39 @@
 <style>
 :root{
   --pink1:#fdecef;
-  --pink2:#f7c6d9;
   --lav:#e8dcf6;
   --gold:#f6d7a7;
   --text:#5a4a5a;
   --muted:#7a6a7a;
+  --glass: rgba(255,255,255,.75);
+  --glass2: rgba(255,255,255,.45);
 }
 
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
 
 body{
-  background:linear-gradient(135deg,var(--pink1),var(--lav));
+  background:
+    radial-gradient(800px 500px at 20% 10%, #fff6fa, transparent 60%),
+    radial-gradient(700px 500px at 80% 20%, #f3ecff, transparent 55%),
+    linear-gradient(135deg,var(--pink1),var(--lav));
   overflow:hidden;
   color:var(--text);
 }
 
 .screen{
-  position:absolute;
+  position:fixed;
   inset:0;
   display:grid;
   place-items:center;
-  transition:opacity .6s ease;
+  transition:opacity .55s ease;
 }
 
 .hidden{opacity:0;pointer-events:none}
 
 .card{
   width:min(720px,92vw);
-  background:rgba(255,255,255,.75);
+  background:var(--glass);
   backdrop-filter:blur(16px);
   border-radius:28px;
   padding:28px;
@@ -44,72 +48,99 @@ body{
   text-align:center;
 }
 
-h1{font-size:clamp(30px,4vw,44px)}
-p{color:var(--muted)}
+h1{font-size:clamp(30px,4vw,44px); margin: 10px 0;}
+p{color:var(--muted); margin: 0 auto 14px; max-width: 60ch; line-height:1.6;}
 
-button{
+.stage{
+  position:relative;
+  height:260px;
+  margin-top:18px;
+  border-radius:22px;
+  background:var(--glass2);
+  border:1px solid rgba(255,255,255,.6);
+  overflow:hidden;
+}
+
+/* intro video fills stage */
+.stage video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* buttons */
+.btn{
   border:none;
   padding:14px 28px;
   border-radius:999px;
   font-size:16px;
-  font-weight:600;
+  font-weight:700;
   cursor:pointer;
   background:linear-gradient(135deg,#f7a8c4,var(--gold));
   box-shadow:0 12px 30px rgba(0,0,0,.15);
 }
 
-.stage{
-  position:relative;
-  height:260px;
-  margin-top:20px;
-  border-radius:22px;
-  background:rgba(255,255,255,.45);
-  overflow:hidden;
-}
-
 .bubble{
   position:absolute;
-  padding:14px 24px;
+  padding:16px 30px;          /* YES easier to click */
   border-radius:999px;
-  font-weight:600;
+  font-weight:800;
   cursor:pointer;
-  background:linear-gradient(135deg,#f7a8c4,var(--gold));
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  background:linear-gradient(135deg,#ff79b8,var(--gold));
+  user-select:none;
+  transition: transform .15s ease;
 }
+.bubble:hover{ transform:scale(1.05); }
 
 .no{
+  padding:14px 24px;
   background:linear-gradient(135deg,#b8eadf,var(--gold));
 }
 
-video{
-  width:100%;
+/* yes screen video area */
+.videoBox{
+  margin-top:14px;
   border-radius:18px;
-  margin-top:16px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.75);
+  background:#fff;
+  box-shadow:0 18px 40px rgba(0,0,0,.12);
+}
+.videoBox video{
+  width:100%;
+  height:min(36vh, 280px);
+  object-fit:cover;
+  display:block;
 }
 </style>
 </head>
 
 <body>
 
+<!-- song plays ONLY after YES -->
 <audio id="song" src="song.mp3" loop></audio>
 
-<!-- INTRO -->
-<div class="screen" id="intro">
+<!-- INTRO (same card + stage size as question) -->
+<div class="screen" id="introScreen">
   <div class="card">
     <h1>Hi Paige 💕</h1>
-    <p>Press play</p>
-    <button onclick="startIntro()">▶ Play</button>
-  </div>
-</div>
+    <p>Press play for the little intro</p>
 
-<!-- INTRO VIDEO -->
-<div class="screen hidden" id="introVideo">
-  <div class="card">
-    <video id="introVid" src="intro.mp4" playsinline></video>
+    <div class="stage" id="introStage" style="display:grid;place-items:center;">
+      <button class="btn" id="playBtn">▶ Play</button>
+    </div>
+
+    <p style="font-size:12px;color:#9a8a9a;margin-top:12px;">
+      Intro has sound · Song starts only after “Yes”
+    </p>
   </div>
 </div>
 
 <!-- QUESTION -->
-<div class="screen hidden" id="question">
+<div class="screen hidden" id="questionScreen">
   <div class="card">
     <h1>Paige, will you be my Valentine? 💕</h1>
     <p>No pressure… but I hope yes 💗</p>
@@ -125,8 +156,15 @@ video{
 <div class="screen hidden" id="yesScreen">
   <div class="card">
     <h1>You said YES 🥹💞</h1>
-    <div id="yesVideoHolder"></div>
-    <p>This made my whole day.</p>
+
+    <div class="videoBox">
+      <!-- Put the video in HTML so it ALWAYS renders (no silent JS failure) -->
+      <video id="yesVid" muted playsinline preload="metadata">
+        <source src="yes.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <p style="margin-top:12px;">This made my whole day.</p>
   </div>
 </div>
 
@@ -139,66 +177,6 @@ video{
 </div>
 
 <script>
-const intro = document.getElementById("intro");
-const introVideo = document.getElementById("introVideo");
-const introVid = document.getElementById("introVid");
-const question = document.getElementById("question");
-const yesScreen = document.getElementById("yesScreen");
-const noScreen = document.getElementById("noScreen");
-const yesVideoHolder = document.getElementById("yesVideoHolder");
-
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const stage = document.getElementById("stage");
-const song = document.getElementById("song");
-
-function startIntro(){
-  intro.classList.add("hidden");
-  introVideo.classList.remove("hidden");
-  introVid.play();
-}
-
-introVid.onended = () => {
-  introVideo.classList.add("hidden");
-  question.classList.remove("hidden");
-  placeButtons();
-};
-
-function placeButtons(){
-  yesBtn.style.left="42%";
-  yesBtn.style.top="60%";
-  noBtn.style.left="60%";
-  noBtn.style.top="60%";
-}
-
-function moveNo(){
-  const r=stage.getBoundingClientRect();
-  noBtn.style.left=Math.random()*(r.width-120)+"px";
-  noBtn.style.top=Math.random()*(r.height-60)+"px";
-}
-
-noBtn.addEventListener("mouseenter",moveNo);
-
-yesBtn.onclick=()=>{
-  song.volume=0.4;
-  song.play().catch(()=>{});
-
-  question.classList.add("hidden");
-  yesScreen.classList.remove("hidden");
-
-  const vid=document.createElement("video");
-  vid.src="yes.mp4";
-  vid.autoplay=true;
-  vid.muted=true;
-  vid.playsInline=true;
-  yesVideoHolder.appendChild(vid);
-};
-
-noBtn.onclick=()=>{
-  question.classList.add("hidden");
-  noScreen.classList.remove("hidden");
-};
-</script>
-
-</body>
-</html>
+const introScreen = document.getElementById("introScreen");
+const questionScreen = document.getElementById("questionScreen");
+const yesScreen = document.getElementById("yesScreen")
