@@ -74,7 +74,7 @@
     }
     .hidden{ display:none !important; }
 
-    /* WELCOME (Mario-ish) */
+    /* Mario-ish welcome screen */
     .marioBg{
       position:absolute;
       inset:-40px;
@@ -174,25 +174,35 @@
       margin-top:12px;
     }
 
-    /* VIDEO FRAME */
-    .video-frame{
+    /* ===== PERFORMANCE FIX FOR INTRO VIDEO =====
+       Keep video container "plain": no shadow, no blur, no transitions.
+       This reduces jank on weaker devices + GitHub Pages.
+    */
+    .videoBox{
       width:100%;
       aspect-ratio:16/9;
       border-radius:18px;
       overflow:hidden;
       background:#000;
-      box-shadow:0 14px 30px rgba(0,0,0,0.15);
       border:1px solid rgba(255,255,255,0.7);
-      margin-top:10px;
+
+      box-shadow:none;
+      filter:none;
+      transition:none;
+      will-change:transform;
     }
-    video{
+
+    .videoBox video{
       width:100%;
       height:100%;
       display:block;
       object-fit:cover;
+
+      transform: translateZ(0);
+      backface-visibility:hidden;
     }
 
-    /* MAIN QUESTION (hidden until after intro) */
+    /* MAIN QUESTION card is hidden until intro ends */
     #mainCard{
       opacity:0;
       pointer-events:none;
@@ -205,7 +215,7 @@
       transform:translateY(0);
     }
 
-    /* STAGE */
+    /* Question Stage */
     .stage{
       position:relative;
       height:260px;
@@ -232,7 +242,6 @@
     .bubble:hover{ transform:scale(1.06); }
     .no{ background:linear-gradient(135deg, var(--mint), var(--gold)); }
 
-    /* SCENES */
     .scene{
       position:absolute;
       inset:0;
@@ -272,52 +281,16 @@
       margin-top:12px;
     }
 
-    /* FIREWORKS */
-    .fireworks{
-      position:absolute;
-      inset:-20px;
-      pointer-events:none;
-      z-index:5;
-      opacity:0;
-      transition:opacity .25s ease;
-    }
-    .fireworks.on{ opacity:1; }
-
-    .fw{
-      position:absolute;
-      width:10px; height:10px;
-      border-radius:999px;
-    }
-    .fw::before, .fw::after{
-      content:"";
-      position:absolute;
-      inset:-40px;
-      border-radius:999px;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(255,255,255,0) 55%),
-        radial-gradient(circle at 30% 30%, rgba(247,168,196,0.95), rgba(247,168,196,0) 60%),
-        radial-gradient(circle at 70% 40%, rgba(246,215,167,0.95), rgba(246,215,167,0) 60%),
-        radial-gradient(circle at 45% 75%, rgba(184,234,223,0.95), rgba(184,234,223,0) 60%);
-      transform: scale(0.6);
-      opacity:0;
-      animation: pop 1.8s infinite;
-    }
-    .fw::after{
-      animation-delay: .4s;
-      transform: scale(0.45);
-    }
-    @keyframes pop{
-      0%   { transform:scale(0.2); opacity:0; }
-      10%  { opacity:1; }
-      35%  { opacity:1; }
-      70%  { transform:scale(1.0); opacity:0; }
-      100% { transform:scale(1.0); opacity:0; }
+    /* Disable transitions/animations while intro video is playing */
+    body.playingIntro *{
+      transition:none !important;
+      animation:none !important;
     }
   </style>
 </head>
 
 <body>
-  <!-- Song only starts AFTER clicking YES on the question -->
+  <!-- Background song (ONLY plays after YES on the QUESTION screen) -->
   <audio id="bgSong" loop preload="auto">
     <source src="song.mp3" type="audio/mpeg">
   </audio>
@@ -340,7 +313,7 @@
         <button class="btn btnNo" id="welcomeNo">No 🤍</button>
       </div>
 
-      <div class="tiny">Tap Play to start (this enables audio on phones too).</div>
+      <div class="tiny">Tap Play to start (this enables audio).</div>
     </div>
   </div>
 
@@ -350,7 +323,7 @@
       <h1 style="margin-top:0;">💗</h1>
       <p style="margin-bottom:12px;">One second…</p>
 
-      <div class="video-frame">
+      <div class="videoBox">
         <video id="introVideo" playsinline preload="auto">
           <source src="intro.mp4" type="video/mp4">
         </video>
@@ -374,17 +347,10 @@
           <div class="scene-card">
             <h2 style="margin:6px 0 10px;">You said YES 🥹💖</h2>
 
-            <div class="video-frame" style="margin-top:10px;">
+            <div class="videoBox" style="margin-top:10px;">
               <video id="yesVideo" muted playsinline preload="auto">
                 <source src="yes.mp4" type="video/mp4">
               </video>
-
-              <div class="fireworks" id="fireworks">
-                <div class="fw" style="top:6%; left:10%;"></div>
-                <div class="fw" style="top:10%; right:8%; animation-delay:.2s;"></div>
-                <div class="fw" style="bottom:8%; left:8%; animation-delay:.6s;"></div>
-                <div class="fw" style="bottom:10%; right:12%; animation-delay:.9s;"></div>
-              </div>
             </div>
 
             <p style="margin:6px auto 0;">This made my whole day.</p>
@@ -423,9 +389,8 @@
 
     const bgSong = document.getElementById("bgSong");
     const yesVideo = document.getElementById("yesVideo");
-    const fireworks = document.getElementById("fireworks");
 
-    // Always force welcome to show first
+    // Force welcome to always show first
     function forceWelcomeFirst(){
       welcomeOverlay.classList.remove("hidden");
       introOverlay.classList.add("hidden");
@@ -443,6 +408,7 @@
 
     function showQuestion(){
       introOverlay.classList.add("hidden");
+      document.body.classList.remove("playingIntro");
       mainCard.classList.add("ready");
       placeButtons();
     }
@@ -452,12 +418,15 @@
       welcomeOverlay.classList.add("hidden");
       introOverlay.classList.remove("hidden");
 
+      // Reduce jank while intro plays
+      document.body.classList.add("playingIntro");
+
       try{
         introVideo.currentTime = 0;
         introVideo.muted = false;
         await introVideo.play();
       }catch(e){
-        // If blocked, user can tap video controls (desktop usually fine).
+        // If blocked, user can tap the video
       }
     });
 
@@ -494,7 +463,7 @@
       btn.style.top  = y + "px";
     }
 
-    // Move BOTH like the No button
+    // Move BOTH
     yesBtn.addEventListener("mouseenter", () => move(yesBtn));
     noBtn.addEventListener("mouseenter", () => move(noBtn));
 
@@ -503,11 +472,10 @@
       yesBtn.style.display = "none";
       noBtn.style.display = "none";
 
-      fireworks.classList.add("on");
-
       // Song starts ONLY after clicking YES here
       startSongOnce();
 
+      // Play YES video muted
       try{
         yesVideo.currentTime = 0;
         yesVideo.muted = true;
@@ -524,7 +492,6 @@
     function resetAll(){
       yesScene.classList.remove("active");
       noScene.classList.remove("active");
-      fireworks.classList.remove("on");
 
       yesBtn.style.display = "block";
       noBtn.style.display = "block";
