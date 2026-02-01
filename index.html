@@ -76,12 +76,12 @@
       padding:14px 22px;
       border-radius:999px;
       font-size:16px;
-      font-weight:700;
+      font-weight:800;
       cursor:pointer;
       border:1px solid rgba(255,255,255,0.8);
       background:linear-gradient(135deg, var(--pink), var(--gold));
       box-shadow:0 12px 30px rgba(0,0,0,0.15);
-      transition:transform .15s ease;
+      transition:transform .12s ease;
       user-select:none;
     }
     .bubble:hover{ transform:scale(1.06); }
@@ -106,11 +106,13 @@
     }
 
     .scene-card{
-      width:min(520px, 92%);
+      width:min(560px, 92%);
       background:rgba(255,255,255,0.92);
       border-radius:22px;
       padding:18px;
       box-shadow:0 20px 50px rgba(0,0,0,0.15);
+      position:relative;
+      overflow:hidden;
     }
 
     .video-frame{
@@ -133,12 +135,13 @@
 
     .reset{
       border:none;
-      background:rgba(255,255,255,0.8);
+      background:rgba(255,255,255,0.84);
       padding:10px 16px;
       border-radius:999px;
       cursor:pointer;
       font-size:13px;
       margin-top:10px;
+      font-weight:700;
     }
 
     .music-hint{
@@ -147,7 +150,7 @@
       margin-top:12px;
     }
 
-    /* Intro overlay */
+    /* Overlay screens */
     .overlay{
       position:fixed;
       inset:0;
@@ -158,36 +161,106 @@
       backdrop-filter: blur(10px);
       z-index:50;
     }
+    .hidden{ display:none !important; }
 
-    .playBtn{
+    /* Tap-to-start "loading" screen */
+    .startCard{
+      width:min(720px, 92vw);
+      border-radius:28px;
+      background:rgba(255,255,255,0.70);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.75);
+      box-shadow:0 30px 80px rgba(0,0,0,0.12);
+      padding:30px 26px;
+      text-align:center;
+    }
+    .startTitle{
+      font-size:clamp(34px,5vw,52px);
+      margin:0 0 8px;
+      letter-spacing:-0.5px;
+    }
+    .startSub{
+      margin:0 auto 18px;
+      color:#7d6a7a;
+    }
+    .startBtn{
       border:none;
       cursor:pointer;
-      padding:14px 20px;
+      padding:16px 24px;
       border-radius:999px;
-      font-weight:800;
-      font-size:15px;
+      font-weight:900;
+      font-size:16px;
       background:linear-gradient(135deg, var(--pink), var(--gold));
       box-shadow:0 16px 40px rgba(0,0,0,0.18);
     }
-
     .tiny{
       font-size:12px;
       color:#8c7a8c;
       margin-top:10px;
     }
 
-    .hidden{ display:none !important; }
-
-    .errorText{
+    /* Fireworks around YES video */
+    .fireworks{
       position:absolute;
-      inset:0;
-      display:grid;
-      place-items:center;
-      padding:18px;
-      color:#fff;
-      font-size:14px;
-      text-align:center;
-      background:#000;
+      inset:-20px;
+      pointer-events:none;
+      z-index:5;
+      opacity:0;
+      transition:opacity .25s ease;
+    }
+    .fireworks.on{ opacity:1; }
+
+    .fw{
+      position:absolute;
+      width:10px; height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.0);
+    }
+
+    .fw::before, .fw::after{
+      content:"";
+      position:absolute;
+      inset:-40px;
+      border-radius:999px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 30% 30%, rgba(247,168,196,0.95), rgba(247,168,196,0) 60%),
+        radial-gradient(circle at 70% 40%, rgba(246,215,167,0.95), rgba(246,215,167,0) 60%),
+        radial-gradient(circle at 45% 75%, rgba(184,234,223,0.95), rgba(184,234,223,0) 60%);
+      filter: blur(0.2px);
+      transform: scale(0.6);
+      opacity:0;
+      animation: pop 1.8s infinite;
+    }
+    .fw::after{
+      animation-delay: .4s;
+      transform: scale(0.45);
+      opacity:0;
+    }
+
+    @keyframes pop{
+      0%   { transform:scale(0.2); opacity:0; }
+      10%  { opacity:1; }
+      35%  { opacity:1; }
+      70%  { transform:scale(1.0); opacity:0; }
+      100% { transform:scale(1.0); opacity:0; }
+    }
+
+    /* Sparkle confetti */
+    .sparkle{
+      position:absolute;
+      width:10px;
+      height:10px;
+      border-radius:3px;
+      background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(247,168,196,0.95));
+      opacity:0;
+      animation: float 2.4s infinite;
+    }
+    @keyframes float{
+      0%   { transform:translateY(12px) rotate(0deg); opacity:0; }
+      12%  { opacity:1; }
+      55%  { opacity:1; }
+      100% { transform:translateY(-90px) rotate(240deg); opacity:0; }
     }
   </style>
 </head>
@@ -198,8 +271,18 @@
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- INTRO OVERLAY (click Play -> intro video plays with sound) -->
-  <div class="overlay" id="introOverlay">
+  <!-- 1) TAP-TO-START "LOADING" SCREEN (no video visible) -->
+  <div class="overlay" id="startOverlay">
+    <div class="startCard">
+      <div class="startTitle">Hi Paige 💗</div>
+      <p class="startSub">I made something for you</p>
+      <button class="startBtn" id="startBtn">✨ Tap to start ✨</button>
+      <div class="tiny">This step lets video + sound play properly.</div>
+    </div>
+  </div>
+
+  <!-- 2) INTRO SCREEN (video hidden until startBtn is clicked) -->
+  <div class="overlay hidden" id="introOverlay">
     <div class="card" style="padding:22px;">
       <h1 style="margin-top:0;">Hi Paige 💗</h1>
       <p style="margin-bottom:12px;">I made something for you</p>
@@ -208,14 +291,9 @@
         <video id="introVideo" playsinline preload="auto">
           <source src="intro.mp4" type="video/mp4">
         </video>
-        <div class="errorText hidden" id="introErr">
-          Intro video not found.<br>
-          Make sure the file is named exactly: <b>intro.mp4</b>
-        </div>
       </div>
 
-      <button class="playBtn" id="playIntroBtn">▶ Play</button>
-      <div class="tiny">Tap Play to start (this allows sound on iPhone/Chrome).</div>
+      <div class="tiny">Enjoy this little intro 💕</div>
     </div>
   </div>
 
@@ -234,13 +312,26 @@
           <div class="scene-card">
             <h2 style="margin:6px 0 10px;">You said YES 🥹💖</h2>
 
-            <div class="video-frame">
+            <div class="video-frame" id="yesFrame">
               <video id="yesVideo" muted playsinline preload="auto">
                 <source src="yes.mp4" type="video/mp4">
               </video>
-              <div class="errorText hidden" id="yesErr">
-                YES video not found.<br>
-                Make sure the file is named exactly: <b>yes.mp4</b> (lowercase)
+
+              <!-- fireworks overlay -->
+              <div class="fireworks" id="fireworks">
+                <div class="fw" style="top:6%; left:10%;"></div>
+                <div class="fw" style="top:10%; right:8%; animation-delay:.2s;"></div>
+                <div class="fw" style="bottom:8%; left:8%; animation-delay:.6s;"></div>
+                <div class="fw" style="bottom:10%; right:12%; animation-delay:.9s;"></div>
+
+                <!-- sparkles -->
+                <div class="sparkle" style="left:12%; bottom:12%; animation-delay:.0s;"></div>
+                <div class="sparkle" style="left:22%; bottom:10%; animation-delay:.25s;"></div>
+                <div class="sparkle" style="left:35%; bottom:12%; animation-delay:.5s;"></div>
+                <div class="sparkle" style="left:50%; bottom:10%; animation-delay:.15s;"></div>
+                <div class="sparkle" style="left:65%; bottom:12%; animation-delay:.4s;"></div>
+                <div class="sparkle" style="left:78%; bottom:10%; animation-delay:.2s;"></div>
+                <div class="sparkle" style="left:88%; bottom:12%; animation-delay:.55s;"></div>
               </div>
             </div>
 
@@ -265,10 +356,11 @@
 
   <script>
     // Elements
+    const startOverlay = document.getElementById("startOverlay");
+    const startBtn = document.getElementById("startBtn");
+
     const introOverlay = document.getElementById("introOverlay");
-    const playIntroBtn = document.getElementById("playIntroBtn");
     const introVideo = document.getElementById("introVideo");
-    const introErr = document.getElementById("introErr");
 
     const mainCard = document.getElementById("mainCard");
     const stage = document.getElementById("stage");
@@ -279,7 +371,7 @@
 
     const bgSong = document.getElementById("bgSong");
     const yesVideo = document.getElementById("yesVideo");
-    const yesErr = document.getElementById("yesErr");
+    const fireworks = document.getElementById("fireworks");
 
     let songStarted = false;
 
@@ -291,17 +383,27 @@
       placeButtons();
     }
 
-    // --- Intro logic: must be user-initiated for sound to work ---
-    playIntroBtn.addEventListener("click", async () => {
-      try {
+    function startSongOnce(){
+      if(songStarted) return;
+      songStarted = true;
+      bgSong.volume = 0.35;
+      bgSong.play().catch(()=>{});
+    }
+
+    // Step 1: Tap-to-start (no video visible yet)
+    startBtn.addEventListener("click", async () => {
+      // Hide loading
+      startOverlay.classList.add("hidden");
+
+      // Show intro overlay + play intro with sound
+      introOverlay.classList.remove("hidden");
+
+      try{
         introVideo.currentTime = 0;
-        introVideo.muted = false; // allow intro sound
-        await introVideo.play();
-        playIntroBtn.disabled = true;
-        playIntroBtn.textContent = "Playing…";
-      } catch (e) {
-        // If it fails, user can click play on the video controls if needed
-        playIntroBtn.textContent = "Tap the video to play";
+        introVideo.muted = false;   // allow intro sound
+        await introVideo.play();    // user gesture happened, so sound is allowed
+      }catch(e){
+        // If something blocks it, user can click the video itself
       }
     });
 
@@ -309,23 +411,6 @@
     introVideo.addEventListener("ended", () => {
       showMain();
     });
-
-    // If intro video file missing
-    introVideo.addEventListener("error", () => {
-      introErr.classList.remove("hidden");
-    });
-
-    // If YES video file missing
-    yesVideo.addEventListener("error", () => {
-      yesErr.classList.remove("hidden");
-    });
-
-    function startSongOnce(){
-      if(songStarted) return;
-      songStarted = true;
-      bgSong.volume = 0.35;
-      bgSong.play().catch(()=>{});
-    }
 
     function placeButtons(){
       const r = stage.getBoundingClientRect();
@@ -335,7 +420,7 @@
       noBtn.style.top   = (r.height * 0.62) + "px";
     }
 
-    // Move buttons (same behavior for YES and NO)
+    // Move buttons
     function move(btn){
       const r = stage.getBoundingClientRect();
       const padX = 20;
@@ -353,25 +438,28 @@
       btn.style.top  = y + "px";
     }
 
+    // Yes + No both move
     yesBtn.addEventListener("mouseenter", () => move(yesBtn));
     noBtn.addEventListener("mouseenter", () => move(noBtn));
 
     yesBtn.onclick = async () => {
-      // show YES scene
       yesScene.classList.add("active");
       yesBtn.style.display = "none";
       noBtn.style.display = "none";
 
+      // fireworks ON
+      fireworks.classList.add("on");
+
       // start background song ONLY here
       startSongOnce();
 
-      // play YES video muted (autoplay should work because muted)
+      // play YES video muted (autoplay ok because muted)
       try{
         yesVideo.currentTime = 0;
         yesVideo.muted = true;
         await yesVideo.play();
       }catch(e){
-        // If browser blocks for any reason, user can click the video
+        // user can click the video if needed
       }
     };
 
@@ -385,6 +473,8 @@
       yesScene.classList.remove("active");
       noScene.classList.remove("active");
 
+      fireworks.classList.remove("on");
+
       yesBtn.style.display = "block";
       noBtn.style.display = "block";
 
@@ -396,9 +486,6 @@
 
       placeButtons();
     }
-
-    // Start with overlay; main hidden until intro ends
-    // If you ever want to skip intro automatically (not recommended for sound), call showMain().
   </script>
 </body>
 </html>
