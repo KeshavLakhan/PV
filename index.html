@@ -61,7 +61,7 @@
       line-height:1.6;
     }
 
-    /* Overlay screens */
+    /* OVERLAYS */
     .overlay{
       position:fixed;
       inset:0;
@@ -74,7 +74,7 @@
     }
     .hidden{ display:none !important; }
 
-    /* Mario-ish Start Screen */
+    /* WELCOME (Mario-ish) */
     .marioBg{
       position:absolute;
       inset:-40px;
@@ -89,9 +89,9 @@
     .marioCard{
       width:min(720px, 92vw);
       border-radius:28px;
-      background:rgba(255,255,255,0.75);
+      background:rgba(255,255,255,0.78);
       backdrop-filter:blur(16px);
-      border:1px solid rgba(255,255,255,0.8);
+      border:1px solid rgba(255,255,255,0.85);
       box-shadow:var(--shadow);
       padding:28px;
       text-align:center;
@@ -112,8 +112,8 @@
       font-size:12px;
       padding:6px 10px;
       border-radius:999px;
-      background:rgba(255,255,255,0.8);
-      border:1px solid rgba(255,255,255,0.85);
+      background:rgba(255,255,255,0.85);
+      border:1px solid rgba(255,255,255,0.9);
     }
 
     .pixelLine{
@@ -143,18 +143,18 @@
       color:#7d6a7a;
     }
 
-    .startButtons{
+    .btnRow{
       display:flex;
       justify-content:center;
-      gap:14px;
+      gap:12px;
       flex-wrap:wrap;
-      margin-top:8px;
+      margin-top:10px;
     }
 
     .btn{
       border:none;
       cursor:pointer;
-      padding:14px 20px;
+      padding:14px 22px;
       border-radius:999px;
       font-weight:900;
       font-size:16px;
@@ -165,7 +165,7 @@
     }
     .btn:hover{ transform:scale(1.03); }
 
-    .btnYes{ background:linear-gradient(135deg, var(--pink), var(--gold)); }
+    .btnPlay{ background:linear-gradient(135deg, var(--pink), var(--gold)); }
     .btnNo{ background:linear-gradient(135deg, var(--mint), var(--gold)); }
 
     .tiny{
@@ -174,7 +174,7 @@
       margin-top:12px;
     }
 
-    /* Intro Video Screen */
+    /* VIDEO FRAME */
     .video-frame{
       width:100%;
       aspect-ratio:16/9;
@@ -183,8 +183,7 @@
       background:#000;
       box-shadow:0 14px 30px rgba(0,0,0,0.15);
       border:1px solid rgba(255,255,255,0.7);
-      margin:12px 0 0;
-      position:relative;
+      margin-top:10px;
     }
     video{
       width:100%;
@@ -193,7 +192,20 @@
       object-fit:cover;
     }
 
-    /* Question stage */
+    /* MAIN QUESTION (hidden until after intro) */
+    #mainCard{
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(6px);
+      transition:opacity .35s ease, transform .35s ease;
+    }
+    #mainCard.ready{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0);
+    }
+
+    /* STAGE */
     .stage{
       position:relative;
       height:260px;
@@ -220,6 +232,7 @@
     .bubble:hover{ transform:scale(1.06); }
     .no{ background:linear-gradient(135deg, var(--mint), var(--gold)); }
 
+    /* SCENES */
     .scene{
       position:absolute;
       inset:0;
@@ -242,12 +255,6 @@
       overflow:hidden;
     }
 
-    .music-hint{
-      font-size:12px;
-      color:#9a8a9a;
-      margin-top:12px;
-    }
-
     .reset{
       border:none;
       background:rgba(255,255,255,0.84);
@@ -259,7 +266,13 @@
       font-weight:800;
     }
 
-    /* Fireworks overlay for YES scene */
+    .music-hint{
+      font-size:12px;
+      color:#9a8a9a;
+      margin-top:12px;
+    }
+
+    /* FIREWORKS */
     .fireworks{
       position:absolute;
       inset:-20px;
@@ -304,13 +317,13 @@
 </head>
 
 <body>
-  <!-- Background song (ONLY plays after YES on the QUESTION screen) -->
+  <!-- Song only starts AFTER clicking YES on the question -->
   <audio id="bgSong" loop preload="auto">
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- START SCREEN (Mario-ish) -->
-  <div class="overlay" id="startOverlay">
+  <!-- WELCOME SCREEN (ALWAYS FIRST) -->
+  <div class="overlay" id="welcomeOverlay">
     <div class="marioBg" aria-hidden="true"></div>
     <div class="marioCard">
       <div class="marioTop">
@@ -320,19 +333,18 @@
 
       <div class="startTitle">Hi Paige 💕</div>
       <div class="startSub">I made something for you</div>
-
       <div class="pixelLine"></div>
 
-      <div class="startButtons">
-        <button class="btn btnYes" id="startYes">YES 💞</button>
-        <button class="btn btnNo" id="startNo">NO 🤍</button>
+      <div class="btnRow">
+        <button class="btn btnPlay" id="playBtn">Play ▶</button>
+        <button class="btn btnNo" id="welcomeNo">No 🤍</button>
       </div>
 
-      <div class="tiny">Tap YES to start the surprise (audio will work).</div>
+      <div class="tiny">Tap Play to start (this enables audio on phones too).</div>
     </div>
   </div>
 
-  <!-- INTRO SCREEN (shows ONLY after YES on start screen) -->
+  <!-- INTRO SCREEN (hidden until Play) -->
   <div class="overlay hidden" id="introOverlay">
     <div class="card" style="padding:22px;">
       <h1 style="margin-top:0;">💗</h1>
@@ -350,7 +362,7 @@
 
   <!-- QUESTION SCREEN -->
   <div class="wrap">
-    <div class="card" id="mainCard" style="opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity .35s ease, transform .35s ease;">
+    <div class="card" id="mainCard">
       <h1>Paige, will you be my Valentine? 💕</h1>
       <p>I was hoping you’d say yes… but no pressure 💗</p>
 
@@ -358,7 +370,6 @@
         <button class="bubble yes" id="yesBtn">Yes 💞</button>
         <button class="bubble no" id="noBtn">No 🤍</button>
 
-        <!-- YES scene -->
         <div class="scene" id="yesScene">
           <div class="scene-card">
             <h2 style="margin:6px 0 10px;">You said YES 🥹💖</h2>
@@ -381,7 +392,6 @@
           </div>
         </div>
 
-        <!-- NO scene -->
         <div class="scene" id="noScene">
           <div class="scene-card">
             <h2 style="margin:6px 0 10px;">That’s okay 💔</h2>
@@ -397,9 +407,9 @@
 
   <script>
     // Elements
-    const startOverlay = document.getElementById("startOverlay");
-    const startYes = document.getElementById("startYes");
-    const startNo = document.getElementById("startNo");
+    const welcomeOverlay = document.getElementById("welcomeOverlay");
+    const playBtn = document.getElementById("playBtn");
+    const welcomeNo = document.getElementById("welcomeNo");
 
     const introOverlay = document.getElementById("introOverlay");
     const introVideo = document.getElementById("introVideo");
@@ -415,16 +425,15 @@
     const yesVideo = document.getElementById("yesVideo");
     const fireworks = document.getElementById("fireworks");
 
-    let songStarted = false;
-
-    function showQuestion(){
+    // Always force welcome to show first
+    function forceWelcomeFirst(){
+      welcomeOverlay.classList.remove("hidden");
       introOverlay.classList.add("hidden");
-      mainCard.style.opacity = "1";
-      mainCard.style.pointerEvents = "auto";
-      mainCard.style.transform = "translateY(0)";
-      placeButtons();
+      mainCard.classList.remove("ready");
     }
+    forceWelcomeFirst();
 
+    let songStarted = false;
     function startSongOnce(){
       if(songStarted) return;
       songStarted = true;
@@ -432,33 +441,34 @@
       bgSong.play().catch(()=>{});
     }
 
-    // START SCREEN actions
-    startYes.addEventListener("click", async () => {
-      // Hide start, show intro
-      startOverlay.classList.add("hidden");
+    function showQuestion(){
+      introOverlay.classList.add("hidden");
+      mainCard.classList.add("ready");
+      placeButtons();
+    }
+
+    // WELCOME: Play -> Intro video (with audio)
+    playBtn.addEventListener("click", async () => {
+      welcomeOverlay.classList.add("hidden");
       introOverlay.classList.remove("hidden");
 
-      // Play intro WITH audio (user gesture already happened)
       try{
         introVideo.currentTime = 0;
         introVideo.muted = false;
         await introVideo.play();
       }catch(e){
-        // If browser blocks, user can click the video itself
+        // If blocked, user can tap video controls (desktop usually fine).
       }
     });
 
-    startNo.addEventListener("click", () => {
-      // If she says no at start, just show a gentle message on start screen
-      startNo.textContent = "Okay 🤍";
-      startNo.disabled = true;
-      startNo.style.opacity = "0.7";
+    welcomeNo.addEventListener("click", () => {
+      welcomeNo.textContent = "Okay 🤍";
+      welcomeNo.disabled = true;
+      welcomeNo.style.opacity = "0.7";
     });
 
-    // Intro ends -> show question
-    introVideo.addEventListener("ended", () => {
-      showQuestion();
-    });
+    // Intro ends -> question
+    introVideo.addEventListener("ended", showQuestion);
 
     function placeButtons(){
       const r = stage.getBoundingClientRect();
@@ -470,8 +480,7 @@
 
     function move(btn){
       const r = stage.getBoundingClientRect();
-      const padX = 20;
-      const padY = 20;
+      const padX = 20, padY = 20;
       const w = btn.offsetWidth || 120;
       const h = btn.offsetHeight || 60;
 
@@ -485,7 +494,7 @@
       btn.style.top  = y + "px";
     }
 
-    // Both move on hover
+    // Move BOTH like the No button
     yesBtn.addEventListener("mouseenter", () => move(yesBtn));
     noBtn.addEventListener("mouseenter", () => move(noBtn));
 
@@ -496,10 +505,9 @@
 
       fireworks.classList.add("on");
 
-      // Start background song ONLY here
+      // Song starts ONLY after clicking YES here
       startSongOnce();
 
-      // play YES video muted
       try{
         yesVideo.currentTime = 0;
         yesVideo.muted = true;
