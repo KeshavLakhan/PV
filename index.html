@@ -179,4 +179,99 @@ p{color:var(--muted); margin: 0 auto 14px; max-width: 60ch; line-height:1.6;}
 <script>
 const introScreen = document.getElementById("introScreen");
 const questionScreen = document.getElementById("questionScreen");
-const yesScreen = document.getElementById("yesScreen")
+const yesScreen = document.getElementById("yesScreen");
+const noScreen = document.getElementById("noScreen");
+
+const introStage = document.getElementById("introStage");
+const playBtn = document.getElementById("playBtn");
+
+const stage = document.getElementById("stage");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn  = document.getElementById("noBtn");
+
+const song = document.getElementById("song");
+const yesVid = document.getElementById("yesVid");
+
+// ---------- INTRO ----------
+playBtn.onclick = () => {
+  // replace the play button with a stage-filling video
+  introStage.innerHTML = `
+    <video id="introVid" playsinline autoplay>
+      <source src="intro.mp4" type="video/mp4">
+    </video>
+  `;
+  const introVid = document.getElementById("introVid");
+  introVid.muted = false; // intro should have sound
+  introVid.volume = 1;
+
+  // If autoplay is blocked for any reason, user click already happened, so play() usually works:
+  introVid.play().catch(()=>{});
+
+  introVid.onended = () => {
+    introScreen.classList.add("hidden");
+    questionScreen.classList.remove("hidden");
+    placeButtons();
+  };
+};
+
+// ---------- BUTTON PLACEMENT ----------
+function placeButtons(){
+  const r = stage.getBoundingClientRect();
+  yesBtn.style.left = (r.width * 0.30) + "px";
+  yesBtn.style.top  = (r.height * 0.62) + "px";
+  noBtn.style.left  = (r.width * 0.62) + "px";
+  noBtn.style.top   = (r.height * 0.62) + "px";
+}
+
+// ---------- MOVEMENT ----------
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function wiggleYes(){
+  const r = stage.getBoundingClientRect();
+  const curX = parseFloat(yesBtn.style.left || (r.width*0.30));
+  const curY = parseFloat(yesBtn.style.top  || (r.height*0.62));
+  const dx = (Math.random()*28 - 14); // small movement
+  const dy = (Math.random()*22 - 11);
+
+  const x = clamp(curX + dx, 8, r.width  - 160);
+  const y = clamp(curY + dy, 8, r.height - 90);
+  yesBtn.style.left = x + "px";
+  yesBtn.style.top  = y + "px";
+}
+
+function fleeNo(){
+  const r = stage.getBoundingClientRect();
+  const x = Math.random() * (r.width  - 130);
+  const y = Math.random() * (r.height - 70);
+  noBtn.style.left = x + "px";
+  noBtn.style.top  = y + "px";
+}
+
+yesBtn.addEventListener("mouseenter", wiggleYes);
+noBtn.addEventListener("mouseenter", () => { fleeNo(); fleeNo(); }); // bigger run
+
+// ---------- CLICKS ----------
+yesBtn.onclick = () => {
+  // start song ONLY here
+  song.volume = 0.4;
+  song.play().catch(()=>{});
+
+  questionScreen.classList.add("hidden");
+  yesScreen.classList.remove("hidden");
+
+  // force the yes video to show + play (muted autoplay allowed)
+  yesVid.currentTime = 0;
+  yesVid.load();
+  yesVid.play().catch(()=>{});
+};
+
+noBtn.onclick = () => {
+  questionScreen.classList.add("hidden");
+  noScreen.classList.remove("hidden");
+};
+
+window.addEventListener("resize", placeButtons);
+</script>
+
+</body>
+</html>
