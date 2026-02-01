@@ -1,79 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Paige 💕</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paige 💖</title>
 
 <style>
 :root{
-  --pink:#fdecef;
-  --lav:#e8dcf6;
-  --gold:#f6d7a7;
-  --text:#5a4a5a;
-  --muted:#7a6a7a;
+  --bg1:#fdecef;
+  --bg2:#f8dce6;
+  --card:#ffffffee;
+  --shadow:0 30px 80px rgba(0,0,0,.18);
 }
 
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
 
-body{
-  background:linear-gradient(135deg,var(--pink),var(--lav));
-  overflow:hidden;
-  color:var(--text);
+html,body{
+  margin:0;
+  height:100%;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at top,#fff 0%,transparent 60%),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
 }
 
-.screen{
-  position:fixed;
-  inset:0;
+.wrap{
+  height:100%;
   display:grid;
   place-items:center;
-  transition:opacity .6s ease;
+  padding:24px;
 }
-.hidden{opacity:0;pointer-events:none}
 
 .card{
-  width:min(820px,94vw);
-  background:rgba(255,255,255,.75);
-  backdrop-filter:blur(16px);
+  width:min(820px,96vw);
+  background:var(--card);
   border-radius:32px;
+  box-shadow:var(--shadow);
   padding:28px;
-  box-shadow:0 30px 80px rgba(0,0,0,.15);
   text-align:center;
 }
 
-h1{font-size:clamp(30px,4vw,46px);margin:10px 0}
-p{color:var(--muted);line-height:1.6}
+.hidden{display:none}
 
-button{
-  border:none;
-  padding:16px 34px;
-  border-radius:999px;
-  font-size:17px;
-  font-weight:700;
-  cursor:pointer;
-  background:linear-gradient(135deg,#f7a8c4,var(--gold));
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+h1{
+  margin:8px 0 12px;
+  font-size:clamp(28px,4vw,44px);
 }
 
-/* QUESTION STAGE */
+p{color:#666}
+
 .stage{
   position:relative;
-  height:260px;
-  margin-top:20px;
-  border-radius:22px;
-  background:rgba(255,255,255,.45);
+  height:360px;
+  margin-top:16px;
+  border-radius:24px;
+  background:#fff;
   overflow:hidden;
 }
 
-/* INTRO STAGE — BIG */
-.stage.intro{
-  height:420px;
-}
-
-/* VIDEOS */
-.stage video,
-.videoBox video{
+/* videos */
+.stage video{
   width:100%;
   height:100%;
   object-fit:cover;
@@ -81,161 +67,145 @@ button{
   border-radius:18px;
 }
 
-/* BUTTONS */
+/* buttons */
 .bubble{
   position:absolute;
-  padding:18px 38px;
+  padding:14px 28px;
   border-radius:999px;
-  font-weight:800;
+  font-size:18px;
   cursor:pointer;
-  border:1px solid rgba(255,255,255,.9);
-  background:linear-gradient(135deg,#ff79b8,var(--gold));
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  border:none;
+  transition:transform .15s;
+}
+
+.yes{
+  background:#ff7fb0;
+  color:#fff;
 }
 
 .no{
-  padding:14px 26px;
-  background:linear-gradient(135deg,#b8eadf,var(--gold));
+  background:#ddd;
+  color:#444;
 }
 
-/* YES VIDEO BOX */
-.videoBox{
-  margin-top:18px;
-  border-radius:22px;
-  overflow:hidden;
-  background:#fff;
-  box-shadow:0 18px 40px rgba(0,0,0,.12);
+.bubble:hover{
+  transform:scale(1.06);
 }
-.videoBox video{
-  height:300px;
+
+/* yes screen */
+.videoBox{
+  width:100%;
+  height:100%;
+  background:#000;
+  border-radius:18px;
+  overflow:hidden;
 }
 </style>
 </head>
 
 <body>
+<div class="wrap">
+
+<!-- INTRO SCREEN -->
+<div class="card" id="intro">
+  <h1>Hi Paige 💗</h1>
+  <p>I made something for you</p>
+  <div class="stage">
+    <video id="introVid" src="intro.mp4" muted playsinline></video>
+    <button class="bubble yes" id="playBtn" style="left:50%;top:50%;transform:translate(-50%,-50%)">
+      Play ▶
+    </button>
+  </div>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div class="card hidden" id="question">
+  <h1>Paige, will you be my Valentine? 💞</h1>
+  <p>I was hoping you’d say yes… but no pressure 💗</p>
+  <div class="stage" id="stage">
+    <button class="bubble yes" id="yesBtn">Yes</button>
+    <button class="bubble no" id="noBtn">No</button>
+  </div>
+</div>
+
+<!-- YES SCREEN -->
+<div class="card hidden" id="yesScreen">
+  <h1>You said YES 🥹💖</h1>
+  <div class="stage">
+    <div class="videoBox">
+      <video id="yesVid" src="yes.mp4" muted playsinline></video>
+    </div>
+  </div>
+  <p>This made my whole day.</p>
+</div>
 
 <audio id="song" src="song.mp3" loop></audio>
 
-<!-- INTRO -->
-<div class="screen" id="intro">
-  <div class="card">
-    <h1>Hi Paige 💕</h1>
-    <p>Press play</p>
-
-    <div class="stage intro" id="introStage">
-      <button onclick="startIntro()">▶ Play</button>
-    </div>
-  </div>
-</div>
-
-<!-- QUESTION -->
-<div class="screen hidden" id="question">
-  <div class="card">
-    <h1>Paige, will you be my Valentine? 💕</h1>
-    <p>No pressure… but I hope yes 💗</p>
-
-    <div class="stage" id="stage">
-      <button class="bubble" id="yesBtn">Yes 💞</button>
-      <button class="bubble no" id="noBtn">No 🤍</button>
-    </div>
-  </div>
-</div>
-
-<!-- YES -->
-<div class="screen hidden" id="yesScreen">
-  <div class="card">
-    <h1>You said YES 🥹💞</h1>
-
-    <div class="videoBox">
-      <video id="yesVid" muted playsinline preload="metadata">
-        <source src="yes.mp4" type="video/mp4">
-      </video>
-    </div>
-
-    <p>This made my whole day.</p>
-  </div>
-</div>
-
-<!-- NO -->
-<div class="screen hidden" id="noScreen">
-  <div class="card">
-    <h1>That’s okay 💔</h1>
-    <p>You’re still amazing 💫</p>
-  </div>
-</div>
-
 <script>
 const intro = document.getElementById("intro");
-const introStage = document.getElementById("introStage");
 const question = document.getElementById("question");
 const yesScreen = document.getElementById("yesScreen");
-const noScreen = document.getElementById("noScreen");
+
+const introVid = document.getElementById("introVid");
+const playBtn = document.getElementById("playBtn");
 
 const stage = document.getElementById("stage");
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 
-const song = document.getElementById("song");
 const yesVid = document.getElementById("yesVid");
+const song = document.getElementById("song");
 
-function startIntro(){
-  introStage.innerHTML = `
-    <video id="introVid" autoplay playsinline>
-      <source src="intro.mp4" type="video/mp4">
-    </video>
-  `;
-  const v = document.getElementById("introVid");
-  v.play().catch(()=>{});
-  v.onended = () => {
+/* INTRO */
+playBtn.onclick = () => {
+  playBtn.style.display="none";
+  introVid.play();
+  introVid.onended = () => {
     intro.classList.add("hidden");
     question.classList.remove("hidden");
     placeButtons();
   };
-}
+};
 
+/* BUTTON PLACEMENT */
 function placeButtons(){
   const r = stage.getBoundingClientRect();
-  yesBtn.style.left = r.width * 0.32 + "px";
-  yesBtn.style.top  = r.height * 0.62 + "px";
-  noBtn.style.left  = r.width * 0.62 + "px";
-  noBtn.style.top   = r.height * 0.62 + "px";
+  yesBtn.style.left = r.width*0.32 + "px";
+  yesBtn.style.top  = r.height*0.62 + "px";
+  noBtn.style.left  = r.width*0.58 + "px";
+  noBtn.style.top   = r.height*0.62 + "px";
 }
 
-function wiggleYes(){
+/* YES MOVES (small + fast) */
+setInterval(()=>{
+  if(question.classList.contains("hidden")) return;
   const r = stage.getBoundingClientRect();
-  const x = parseFloat(yesBtn.style.left) + (Math.random()*20 - 10);
-  const y = parseFloat(yesBtn.style.top)  + (Math.random()*14 - 7);
-  yesBtn.style.left = Math.max(8, Math.min(r.width-160, x)) + "px";
-  yesBtn.style.top  = Math.max(8, Math.min(r.height-90, y)) + "px";
-}
+  const x = parseFloat(yesBtn.style.left);
+  const y = parseFloat(yesBtn.style.top);
+  yesBtn.style.left = Math.max(10,Math.min(r.width-160,x + (Math.random()*16-8)))+"px";
+  yesBtn.style.top  = Math.max(10,Math.min(r.height-80,y + (Math.random()*12-6)))+"px";
+},350);
 
-function fleeNo(){
+/* NO RUNS */
+noBtn.onmouseenter = ()=>{
   const r = stage.getBoundingClientRect();
-  noBtn.style.left = Math.random()*(r.width-130)+"px";
-  noBtn.style.top  = Math.random()*(r.height-70)+"px";
-}
+  noBtn.style.left = Math.random()*(r.width-160)+"px";
+  noBtn.style.top  = Math.random()*(r.height-80)+"px";
+};
 
-setInterval(wiggleYes, 900);
-noBtn.addEventListener("mouseenter", fleeNo);
-
-yesBtn.onclick = () => {
-  song.volume = 0.4;
-  song.play().catch(()=>{});
-
+/* YES CLICK */
+yesBtn.onclick = ()=>{
   question.classList.add("hidden");
   yesScreen.classList.remove("hidden");
 
-  yesVid.load();
-  yesVid.play().catch(()=>{});
-};
+  song.volume = 0.35;
+  song.play().catch(()=>{});
 
-noBtn.onclick = () => {
-  question.classList.add("hidden");
-  noScreen.classList.remove("hidden");
+  yesVid.currentTime = 0;
+  setTimeout(()=>yesVid.play().catch(()=>{}),200);
 };
-
-window.addEventListener("resize", placeButtons);
 </script>
 
+</div>
 </body>
 </html>
