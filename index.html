@@ -47,7 +47,7 @@ h1{
   font-size:clamp(28px,4vw,44px);
 }
 
-p{color:#666}
+p{color:#666; margin:0 0 10px}
 
 .stage{
   position:relative;
@@ -58,7 +58,6 @@ p{color:#666}
   overflow:hidden;
 }
 
-/* videos */
 .stage video{
   width:100%;
   height:100%;
@@ -67,7 +66,7 @@ p{color:#666}
   border-radius:18px;
 }
 
-/* buttons */
+/* Buttons */
 .bubble{
   position:absolute;
   padding:14px 28px;
@@ -76,6 +75,7 @@ p{color:#666}
   cursor:pointer;
   border:none;
   transition:transform .15s;
+  user-select:none;
 }
 
 .yes{
@@ -88,17 +88,34 @@ p{color:#666}
   color:#444;
 }
 
-.bubble:hover{
-  transform:scale(1.06);
-}
+.bubble:hover{ transform:scale(1.06); }
 
-/* yes screen */
+/* YES video container */
 .videoBox{
   width:100%;
   height:100%;
   background:#000;
   border-radius:18px;
   overflow:hidden;
+  position:relative;
+}
+
+.fallback{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-size:14px;
+  padding:18px;
+  text-align:center;
+  opacity:.85;
+  pointer-events:none;
+}
+.smallNote{
+  font-size:12px;
+  color:#8a7a8a;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -110,18 +127,24 @@ p{color:#666}
 <div class="card" id="intro">
   <h1>Hi Paige 💗</h1>
   <p>I made something for you</p>
+
   <div class="stage">
-    <video id="introVid" src="intro.mp4" muted playsinline></video>
-    <button class="bubble yes" id="playBtn" style="left:50%;top:50%;transform:translate(-50%,-50%)">
+    <video id="introVid" src="intro.mp4" muted playsinline preload="auto"></video>
+
+    <button class="bubble yes" id="playBtn"
+      style="left:50%;top:50%;transform:translate(-50%,-50%)">
       Play ▶
     </button>
   </div>
+
+  <div class="smallNote">Tap Play (this lets videos/audio work on phones)</div>
 </div>
 
 <!-- QUESTION SCREEN -->
 <div class="card hidden" id="question">
   <h1>Paige, will you be my Valentine? 💞</h1>
   <p>I was hoping you’d say yes… but no pressure 💗</p>
+
   <div class="stage" id="stage">
     <button class="bubble yes" id="yesBtn">Yes</button>
     <button class="bubble no" id="noBtn">No</button>
@@ -131,15 +154,21 @@ p{color:#666}
 <!-- YES SCREEN -->
 <div class="card hidden" id="yesScreen">
   <h1>You said YES 🥹💖</h1>
+
   <div class="stage">
     <div class="videoBox">
-      <video id="yesVid" src="yes.mp4" muted playsinline></video>
+      <video id="yesVid" src="yes.mp4" muted playsinline preload="auto"></video>
+      <div class="fallback" id="yesFallback" style="display:none;">
+        Video not found.<br/>
+        Make sure the file in your repo is named exactly: <b>yes.mp4</b> (lowercase).
+      </div>
     </div>
   </div>
+
   <p>This made my whole day.</p>
 </div>
 
-<audio id="song" src="song.mp3" loop></audio>
+<audio id="song" src="song.mp3" loop preload="auto"></audio>
 
 <script>
 const intro = document.getElementById("intro");
@@ -154,12 +183,14 @@ const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
 
 const yesVid = document.getElementById("yesVid");
+const yesFallback = document.getElementById("yesFallback");
+
 const song = document.getElementById("song");
 
-/* INTRO */
-playBtn.onclick = () => {
-  playBtn.style.display="none";
-  introVid.play();
+/* INTRO: play -> then go to question */
+playBtn.onclick = async () => {
+  playBtn.style.display = "none";
+  try { await introVid.play(); } catch(e) {}
   introVid.onended = () => {
     intro.classList.add("hidden");
     question.classList.remove("hidden");
@@ -167,43 +198,73 @@ playBtn.onclick = () => {
   };
 };
 
-/* BUTTON PLACEMENT */
+/* place initial buttons */
 function placeButtons(){
   const r = stage.getBoundingClientRect();
-  yesBtn.style.left = r.width*0.32 + "px";
+  yesBtn.style.left = r.width*0.33 + "px";
   yesBtn.style.top  = r.height*0.62 + "px";
   noBtn.style.left  = r.width*0.58 + "px";
   noBtn.style.top   = r.height*0.62 + "px";
 }
 
-/* YES MOVES (small + fast) */
-setInterval(()=>{
-  if(question.classList.contains("hidden")) return;
+/* dodge function (keeps inside box) */
+function dodge(btn, strength){
   const r = stage.getBoundingClientRect();
-  const x = parseFloat(yesBtn.style.left);
-  const y = parseFloat(yesBtn.style.top);
-  yesBtn.style.left = Math.max(10,Math.min(r.width-160,x + (Math.random()*16-8)))+"px";
-  yesBtn.style.top  = Math.max(10,Math.min(r.height-80,y + (Math.random()*12-6)))+"px";
-},350);
+  const maxX = r.width - 160;
+  const maxY = r.height - 80;
 
-/* NO RUNS */
-noBtn.onmouseenter = ()=>{
-  const r = stage.getBoundingClientRect();
-  noBtn.style.left = Math.random()*(r.width-160)+"px";
-  noBtn.style.top  = Math.random()*(r.height-80)+"px";
-};
+  // move relative to current position (so it feels “alive”)
+  const curX = parseFloat(btn.style.left || "0");
+  const curY = parseFloat(btn.style.top  || "0");
 
-/* YES CLICK */
-yesBtn.onclick = ()=>{
+  const dx = (Math.random()*2 - 1) * strength;
+  const dy = (Math.random()*2 - 1) * (strength * 0.7);
+
+  let nx = curX + dx;
+  let ny = curY + dy;
+
+  // if off bounds, randomize a bit (so it never gets stuck)
+  if (nx < 10 || nx > maxX) nx = Math.random() * maxX;
+  if (ny < 10 || ny > maxY) ny = Math.random() * maxY;
+
+  btn.style.left = Math.max(10, Math.min(maxX, nx)) + "px";
+  btn.style.top  = Math.max(10, Math.min(maxY, ny)) + "px";
+}
+
+/* YES moves like NO (but less) */
+yesBtn.onmouseenter = () => dodge(yesBtn, 120); // smaller dodge
+noBtn.onmouseenter  = () => dodge(noBtn, 260);  // bigger dodge
+
+/* YES click: show yes screen, play song, play muted video */
+yesBtn.onclick = async () => {
   question.classList.add("hidden");
   yesScreen.classList.remove("hidden");
 
-  song.volume = 0.35;
-  song.play().catch(()=>{});
+  // start song (ONLY after YES)
+  try {
+    song.volume = 0.35;
+    await song.play();
+  } catch(e) {}
 
+  // force video to load + play
+  yesFallback.style.display = "none";
   yesVid.currentTime = 0;
-  setTimeout(()=>yesVid.play().catch(()=>{}),200);
+  yesVid.load();
+
+  // if the file name/path is wrong, show a message
+  yesVid.onerror = () => { yesFallback.style.display = "grid"; };
+
+  // play (muted, allowed after user gesture)
+  setTimeout(async () => {
+    try { await yesVid.play(); } catch(e) {}
+  }, 150);
 };
+
+window.addEventListener("resize", () => {
+  if(!question.classList.contains("hidden")) placeButtons();
+});
+
+placeButtons();
 </script>
 
 </div>
