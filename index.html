@@ -7,23 +7,18 @@
 
 <style>
 :root{
-  --pink1:#fdecef;
+  --pink:#fdecef;
   --lav:#e8dcf6;
   --gold:#f6d7a7;
   --text:#5a4a5a;
   --muted:#7a6a7a;
-  --glass: rgba(255,255,255,.75);
-  --glass2: rgba(255,255,255,.45);
 }
 
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
 
 body{
-  background:
-    radial-gradient(800px 500px at 20% 10%, #fff6fa, transparent 60%),
-    radial-gradient(700px 500px at 80% 20%, #f3ecff, transparent 55%),
-    linear-gradient(135deg,var(--pink1),var(--lav));
+  background:linear-gradient(135deg,var(--pink),var(--lav));
   overflow:hidden;
   color:var(--text);
 }
@@ -33,114 +28,108 @@ body{
   inset:0;
   display:grid;
   place-items:center;
-  transition:opacity .55s ease;
+  transition:opacity .6s ease;
 }
-
 .hidden{opacity:0;pointer-events:none}
 
 .card{
-  width:min(720px,92vw);
-  background:var(--glass);
+  width:min(820px,94vw);
+  background:rgba(255,255,255,.75);
   backdrop-filter:blur(16px);
-  border-radius:28px;
+  border-radius:32px;
   padding:28px;
   box-shadow:0 30px 80px rgba(0,0,0,.15);
   text-align:center;
 }
 
-h1{font-size:clamp(30px,4vw,44px); margin: 10px 0;}
-p{color:var(--muted); margin: 0 auto 14px; max-width: 60ch; line-height:1.6;}
+h1{font-size:clamp(30px,4vw,46px);margin:10px 0}
+p{color:var(--muted);line-height:1.6}
 
-.stage{
-  position:relative;
-  height:260px;
-  margin-top:18px;
-  border-radius:22px;
-  background:var(--glass2);
-  border:1px solid rgba(255,255,255,.6);
-  overflow:hidden;
-}
-
-/* intro video fills stage */
-.stage video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-/* buttons */
-.btn{
+button{
   border:none;
-  padding:14px 28px;
+  padding:16px 34px;
   border-radius:999px;
-  font-size:16px;
+  font-size:17px;
   font-weight:700;
   cursor:pointer;
   background:linear-gradient(135deg,#f7a8c4,var(--gold));
   box-shadow:0 12px 30px rgba(0,0,0,.15);
 }
 
+/* QUESTION STAGE */
+.stage{
+  position:relative;
+  height:260px;
+  margin-top:20px;
+  border-radius:22px;
+  background:rgba(255,255,255,.45);
+  overflow:hidden;
+}
+
+/* INTRO STAGE — BIG */
+.stage.intro{
+  height:420px;
+}
+
+/* VIDEOS */
+.stage video,
+.videoBox video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-radius:18px;
+}
+
+/* BUTTONS */
 .bubble{
   position:absolute;
-  padding:16px 30px;          /* YES easier to click */
+  padding:18px 38px;
   border-radius:999px;
   font-weight:800;
   cursor:pointer;
-  border:1px solid rgba(255,255,255,.85);
-  box-shadow:0 12px 30px rgba(0,0,0,.15);
+  border:1px solid rgba(255,255,255,.9);
   background:linear-gradient(135deg,#ff79b8,var(--gold));
-  user-select:none;
-  transition: transform .15s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,.15);
 }
-.bubble:hover{ transform:scale(1.05); }
 
 .no{
-  padding:14px 24px;
+  padding:14px 26px;
   background:linear-gradient(135deg,#b8eadf,var(--gold));
 }
 
-/* yes screen video area */
+/* YES VIDEO BOX */
 .videoBox{
-  margin-top:14px;
-  border-radius:18px;
+  margin-top:18px;
+  border-radius:22px;
   overflow:hidden;
-  border:1px solid rgba(255,255,255,.75);
   background:#fff;
   box-shadow:0 18px 40px rgba(0,0,0,.12);
 }
 .videoBox video{
-  width:100%;
-  height:min(36vh, 280px);
-  object-fit:cover;
-  display:block;
+  height:300px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- song plays ONLY after YES -->
 <audio id="song" src="song.mp3" loop></audio>
 
-<!-- INTRO (same card + stage size as question) -->
-<div class="screen" id="introScreen">
+<!-- INTRO -->
+<div class="screen" id="intro">
   <div class="card">
     <h1>Hi Paige 💕</h1>
-    <p>Press play for the little intro</p>
+    <p>Press play</p>
 
-    <div class="stage" id="introStage" style="display:grid;place-items:center;">
-      <button class="btn" id="playBtn">▶ Play</button>
+    <div class="stage intro" id="introStage">
+      <button onclick="startIntro()">▶ Play</button>
     </div>
-
-    <p style="font-size:12px;color:#9a8a9a;margin-top:12px;">
-      Intro has sound · Song starts only after “Yes”
-    </p>
   </div>
 </div>
 
 <!-- QUESTION -->
-<div class="screen hidden" id="questionScreen">
+<div class="screen hidden" id="question">
   <div class="card">
     <h1>Paige, will you be my Valentine? 💕</h1>
     <p>No pressure… but I hope yes 💗</p>
@@ -158,13 +147,12 @@ p{color:var(--muted); margin: 0 auto 14px; max-width: 60ch; line-height:1.6;}
     <h1>You said YES 🥹💞</h1>
 
     <div class="videoBox">
-      <!-- Put the video in HTML so it ALWAYS renders (no silent JS failure) -->
       <video id="yesVid" muted playsinline preload="metadata">
         <source src="yes.mp4" type="video/mp4">
       </video>
     </div>
 
-    <p style="margin-top:12px;">This made my whole day.</p>
+    <p>This made my whole day.</p>
   </div>
 </div>
 
@@ -172,101 +160,77 @@ p{color:var(--muted); margin: 0 auto 14px; max-width: 60ch; line-height:1.6;}
 <div class="screen hidden" id="noScreen">
   <div class="card">
     <h1>That’s okay 💔</h1>
-    <p>Thanks for being honest — you’re still amazing 💫</p>
+    <p>You’re still amazing 💫</p>
   </div>
 </div>
 
 <script>
-const introScreen = document.getElementById("introScreen");
-const questionScreen = document.getElementById("questionScreen");
+const intro = document.getElementById("intro");
+const introStage = document.getElementById("introStage");
+const question = document.getElementById("question");
 const yesScreen = document.getElementById("yesScreen");
 const noScreen = document.getElementById("noScreen");
 
-const introStage = document.getElementById("introStage");
-const playBtn = document.getElementById("playBtn");
-
 const stage = document.getElementById("stage");
 const yesBtn = document.getElementById("yesBtn");
-const noBtn  = document.getElementById("noBtn");
+const noBtn = document.getElementById("noBtn");
 
 const song = document.getElementById("song");
 const yesVid = document.getElementById("yesVid");
 
-// ---------- INTRO ----------
-playBtn.onclick = () => {
-  // replace the play button with a stage-filling video
+function startIntro(){
   introStage.innerHTML = `
-    <video id="introVid" playsinline autoplay>
+    <video id="introVid" autoplay playsinline>
       <source src="intro.mp4" type="video/mp4">
     </video>
   `;
-  const introVid = document.getElementById("introVid");
-  introVid.muted = false; // intro should have sound
-  introVid.volume = 1;
-
-  // If autoplay is blocked for any reason, user click already happened, so play() usually works:
-  introVid.play().catch(()=>{});
-
-  introVid.onended = () => {
-    introScreen.classList.add("hidden");
-    questionScreen.classList.remove("hidden");
+  const v = document.getElementById("introVid");
+  v.play().catch(()=>{});
+  v.onended = () => {
+    intro.classList.add("hidden");
+    question.classList.remove("hidden");
     placeButtons();
   };
-};
-
-// ---------- BUTTON PLACEMENT ----------
-function placeButtons(){
-  const r = stage.getBoundingClientRect();
-  yesBtn.style.left = (r.width * 0.30) + "px";
-  yesBtn.style.top  = (r.height * 0.62) + "px";
-  noBtn.style.left  = (r.width * 0.62) + "px";
-  noBtn.style.top   = (r.height * 0.62) + "px";
 }
 
-// ---------- MOVEMENT ----------
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function placeButtons(){
+  const r = stage.getBoundingClientRect();
+  yesBtn.style.left = r.width * 0.32 + "px";
+  yesBtn.style.top  = r.height * 0.62 + "px";
+  noBtn.style.left  = r.width * 0.62 + "px";
+  noBtn.style.top   = r.height * 0.62 + "px";
+}
 
 function wiggleYes(){
   const r = stage.getBoundingClientRect();
-  const curX = parseFloat(yesBtn.style.left || (r.width*0.30));
-  const curY = parseFloat(yesBtn.style.top  || (r.height*0.62));
-  const dx = (Math.random()*28 - 14); // small movement
-  const dy = (Math.random()*22 - 11);
-
-  const x = clamp(curX + dx, 8, r.width  - 160);
-  const y = clamp(curY + dy, 8, r.height - 90);
-  yesBtn.style.left = x + "px";
-  yesBtn.style.top  = y + "px";
+  const x = parseFloat(yesBtn.style.left) + (Math.random()*20 - 10);
+  const y = parseFloat(yesBtn.style.top)  + (Math.random()*14 - 7);
+  yesBtn.style.left = Math.max(8, Math.min(r.width-160, x)) + "px";
+  yesBtn.style.top  = Math.max(8, Math.min(r.height-90, y)) + "px";
 }
 
 function fleeNo(){
   const r = stage.getBoundingClientRect();
-  const x = Math.random() * (r.width  - 130);
-  const y = Math.random() * (r.height - 70);
-  noBtn.style.left = x + "px";
-  noBtn.style.top  = y + "px";
+  noBtn.style.left = Math.random()*(r.width-130)+"px";
+  noBtn.style.top  = Math.random()*(r.height-70)+"px";
 }
 
-yesBtn.addEventListener("mouseenter", wiggleYes);
-noBtn.addEventListener("mouseenter", () => { fleeNo(); fleeNo(); }); // bigger run
+setInterval(wiggleYes, 900);
+noBtn.addEventListener("mouseenter", fleeNo);
 
-// ---------- CLICKS ----------
 yesBtn.onclick = () => {
-  // start song ONLY here
   song.volume = 0.4;
   song.play().catch(()=>{});
 
-  questionScreen.classList.add("hidden");
+  question.classList.add("hidden");
   yesScreen.classList.remove("hidden");
 
-  // force the yes video to show + play (muted autoplay allowed)
-  yesVid.currentTime = 0;
   yesVid.load();
   yesVid.play().catch(()=>{});
 };
 
 noBtn.onclick = () => {
-  questionScreen.classList.add("hidden");
+  question.classList.add("hidden");
   noScreen.classList.remove("hidden");
 };
 
